@@ -4,6 +4,27 @@ MultiThreaded version of a custom protocol built on TCP/IP stack. here am implem
 # Modules
 - [x] server module : holds the implementation for the server codes
 - [x] client module : holds the implementation for the client codes
+- [x] rough thread patch : holds a rough thread implementation (check sample below : ref [yo_thread/y_thread.c])
+
+```shell 
+/* threads always take a function as an argument */
+/* these functions have constraints such that the */
+/* function has to return a void pointer and also */
+/* take a void pointer as an argument too */
+void * threaded_reference()
+{
+  pthread_mutex_lock(&threaded_mutex);    
+  int value = ((rand() % 7) + 1);
+  int* res = malloc(sizeof(int));
+  *res = value;
+  mutex_data_set = 1;                     /* data has been set by rand value call */
+  pthread_cond_signal(&threaded_condv);   /* signal sent to the conditional variable */
+  printf("threaded_mem_add: %p\t threaded_mem_value:%d\n", res, *res);
+  pthread_mutex_unlock(&threaded_mutex);  /* unlock the mutex and release CPU mem space */
+  return (void *)res;
+}
+
+```
 
 # Notes
 This project is still work in progress
