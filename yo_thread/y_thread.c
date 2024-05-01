@@ -26,45 +26,44 @@ int mutex_data_set = 0;
 /* these functions have constraints such that the */
 /* function has to return a void pointer and also */
 /* take a void pointer as an argument too */
-void * threaded_reference(void* refx)
+void * threaded_reference()
 {
-  pthread_mutex_lock(&threaded_mutex);
+  pthread_mutex_lock(&threaded_mutex);    
   int value = ((rand() % 7) + 1);
   int* res = malloc(sizeof(int));
   *res = value;
   mutex_data_set = 1;                     /* data has been set by rand value call */
   pthread_cond_signal(&threaded_condv);   /* signal sent to the conditional variable */
-  printf("threaded_mem_add: %p\n", res);
+  printf("threaded_mem_add: %p\t threaded_mem_value:%d\n", res, *res);
   pthread_mutex_unlock(&threaded_mutex);  /* unlock the mutex and release CPU mem space */
-  return res;
+  return (void *)res;
 }
 
 int main()
 {
   /* let this variable hold the data returned */
   /* from the threaded reference func call */
+  pthread_mutex_init(&threaded_mutex, NULL);
   int* res;
+  srand(time(NULL));
+
   /* create the threads locally scoped */
   pthread_t ref_tidx;
   pthread_t ref_tidy;
 
   /* lock the thread for data processing */
-  pthread_mutex_lock(&threaded_mutex);
-  while(mutex_data_set == 0) 
-    /* if the mutex data set is still 0 */
-    /* send a signal to the conditional variable */
-    /* then wait until data is received */
-    pthread_cond_wait(&threaded_condv, &threaded_mutex);
-  pthread_mutex_unlock(&threaded_mutex);
-  
   /* create the threads implementations */
-  pthread_create(&ref_tidx, NULL, &threaded_reference, (void *)res);
-  pthread_create(&ref_tidy, NULL, &threaded_reference, (void *)res);
+  pthread_create(&ref_tidx, NULL, &threaded_reference, NULL);
+  pthread_create(&ref_tidy, NULL, &threaded_reference, NULL);
+
   /* make the threads joinable*/
-  pthread_join(ref_tidx, NULL);
-  pthread_join(ref_tidy, NULL);
+  pthread_join(ref_tidx, (void **) &res);
+  pthread_join(ref_tidy, (void **) &res);
+  printf("main_mem: %p\t main_mem_value:%d\n", res, *res);
+  free(res);
   /* you can also use the pthread_exit to hold the main thread execution */
   /* until the threaded_reference threads complete execution */
-  pthread_exit(NULL);
+  // pthread_exit(NULL);
+  pthread_mutex_destroy(&threaded_mutex);
   return 0;
 }
