@@ -39,6 +39,55 @@ void * threaded_reference()
   return (void *)res;
 }
 
+void * sample_socket_thread(void* argv) 
+{
+  int sockfd, newsockfd, portno, io;
+  struct sockaddr_in sv_addr, cv_addr;
+  char buffer[255];
+  socklen_t cv_len;
+  char** arrg;
+  pthread_mutex_lock(&threaded_mutex);        /* lock the operation here ... */
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(sockfd < 0) perror("conn error");
+  arrg = (char**) argv;
+  portno = atoi(arrg[1]);
+  bzero((char*)&sv_addr, sizeof(sv_addr));
+  sv_addr.sin_family = AF_INET;
+  sv_addr.sin_addr.s_addr = INADDR_ANY;
+  sv_addr.sin_port = htons(portno);
+  if(bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr)) < 0) perror("bind error");
+  if(listen(sockfd, 5) < 0) perror("listen error");
+  cv_len = sizeof(cv_addr);
+  newsockfd = accept(sockfd,(struct sockaddr*)&cv_addr, &cv_len);
+  if(newsockfd < 0) perror("accept error");
+  while(1)
+  {
+    bzero(buffer, 255);
+    io = read(newsockfd, buffer, 255);
+    if(io < 0) perror("read error");
+    bzero(buffer, 255);
+    fgets(buffer, 255, stdin);
+    io = write(newsockfd, buffer, 255);
+    if(io < 0) perror("write error");
+    if(strncmp(buffer, "bye", 3) == 0) break;
+  }
+  pthread_mutex_unlock(&threaded_mutex);       /* unlock to free memory space */
+  close(newsockfd);
+  close(sockfd);
+  return NULL;
+} 
+
+int sample_main(int argc, char** argv)
+{
+  if(argc < 2) perror("invalid args");
+  pthread_mutex_init(&threaded_mutex, NULL);
+  pthread_t sample_tid0;
+  pthread_create(&sample_tid0,NULL, &sample_socket_thread, &argc);
+  pthread_join(sample_tid0, NULL);
+  pthread_mutex_destroy(&threaded_mutex);
+  return 0;
+}
+
 int main()
 {
   /* let this variable hold the data returned */
