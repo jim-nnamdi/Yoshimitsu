@@ -1,2 +1,9 @@
 # Yoshimitsu
-Yoshimitsu is a ninja and the leader of the Manji Clan, a group that steals from people who profit from dishonest activities so that they can redistribute this wealth to the poor.He wields a possessed sword, the Cursed Blade Yoshimitsu, a demon-slaying weapon that thirsts for blood and drives its wielder to sate its hunger; Yoshimitsu does this by cutting down wicked people.
+MultiThreaded version of a custom protocol built on TCP/IP stack. here am implementing a more rather generic protocol to control the messages sent over in this network, apparently the main use case is for a centralized IRC Network. the code flow follows basic server-client implementations, where the server binds and accepts connections from the clients and the clients connects and sends messages to the server and vice versa.
+
+# Modules
+- [x] server module : holds the implementation for the server codes
+- [x] client module : holds the implementation for the client codes
+
+# Notes
+This project is still work in progress
