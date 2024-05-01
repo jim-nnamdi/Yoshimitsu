@@ -3,19 +3,30 @@
 #define MAX_NO_CONN 5
 #define CONN_ALIVE 1
 
-struct server_handle
-{
-  int sockfd, newsockfd, portno, iop;
-  struct sockaddr_in server_address, client_address;
-  socklen_t client_data_length;
-  char buffer[255];
-};
-
 /* handles the error message returned in event of fail*/
 void server_call_error(const char *msg)
 {
   perror(msg);
   exit(1);
+}
+
+int bind_server(struct server_handle *server_sock)
+{
+   /* following the documentation as regards socket */
+  /* interaction, after the socket initialization */
+  /* we need to bind the port and sockets */
+  if (bind(server_sock->sockfd, (struct sockaddr *)&server_sock->server_address, sizeof(server_sock->server_address)) < 0)
+    server_call_error("bind error");
+  return 0;
+}
+
+int listen_server(struct server_handle *server_sock, int conn_count)
+{
+    /* we need to set the number of connections to */
+  /* listen to: this is a basic implementation without threads */
+  if (listen(server_sock->sockfd, MAX_NO_CONN) < 0)
+    server_call_error("conn exceeded");
+  return 0;
 }
 
 /* driver function to initialize the server
@@ -58,12 +69,12 @@ int main(int argc, char **argv)
   /* following the documentation as regards socket */
   /* interaction, after the socket initialization */
   /* we need to bind the port and sockets */
-  if (bind(server_sock->sockfd, (struct sockaddr *)&server_sock->server_address, sizeof(server_sock->server_address)) < 0)
+  if (bind_server(server_sock) < 0)
     server_call_error("bind error");
 
   /* we need to set the number of connections to */
   /* listen to: this is a basic implementation without threads */
-  if (listen(server_sock->sockfd, MAX_NO_CONN) < 0)
+  if (listen_server(server_sock, MAX_NO_CONN) < 0)
     server_call_error("conn exceeded");
 
   /* after the bind and listen operations we need */
