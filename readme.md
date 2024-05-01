@@ -7,10 +7,11 @@ MultiThreaded version of a custom protocol built on TCP/IP stack. here am implem
 - [x] rough thread patch : holds a rough thread implementation (check sample below : ref [yo_thread/y_thread.c])
 
 ```shell 
-/* threads always take a function as an argument */
-/* these functions have constraints such that the */
-/* function has to return a void pointer and also */
-/* take a void pointer as an argument too */
+threads always take a function as an argument 
+these functions have constraints such that the 
+function has to return a void pointer and also 
+take a void pointer as an argument too 
+
 void * threaded_reference()
 {
   pthread_mutex_lock(&threaded_mutex);    
